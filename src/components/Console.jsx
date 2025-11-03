@@ -261,12 +261,20 @@ function ClientConsole() {
     if (!clientId) return alert("Enter Client ID");
 
     try {
+      console.log("🔵 Attempting to connect with clientId:", clientId); // ADD THIS
       const res = await fetch("/api/connect", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ clientId }),
       });
+
+      console.log("🔵 Response status:", res.status, res.statusText); // ADD THIS
+    
       const data = await res.json();
+
+       console.log("🔵 Response data:", data); // ADD THIS
+       console.log("🔵 data.status:", data.status); // ADD THIS
+       console.log("🔵 Comparison result:", data.status === "connected"); // ADD THIS
 
       if (data.status === "connected") {
         setConnected(true);
@@ -275,6 +283,7 @@ function ClientConsole() {
         appendMessage("Connection failed: " + data.message);
       }
     } catch (err) {
+      console.error("🔴 Error:", err); // ADD THIS
       appendMessage("Error connecting: " + err.message);
     }
   };
@@ -315,6 +324,7 @@ function ClientConsole() {
         setAlertMessage(data.alert);
         setTimeout(() => setAlertMessage(null), 6000);
       }
+      
     } catch (err) {
       appendMessage("Error executing query: " + err.message);
     }

@@ -5,6 +5,41 @@ body {
   padding: 20px;
 }
 
+.client-details {
+  background-color: #0a0a0a;
+  min-height: 100vh;
+  padding: 30px;
+}
+
+.client-details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.client-details-header h1 {
+  color: #ffffff;
+  font-size: 32px;
+  margin: 0;
+}
+
+.back-button {
+  padding: 10px 25px;
+  background: #1a1a1a;
+  color: #ffffff !important;
+  border: none;
+  border-radius: 8px;
+  text-decoration: none !important;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.back-button:hover {
+  background: #2a2a2a;
+  transform: translateY(-2px);
+}
+
 .client-details .card {
   background: #1e1e1e;
   padding: 12px;

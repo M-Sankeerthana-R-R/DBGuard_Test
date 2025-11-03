@@ -133,7 +133,6 @@
 
 // src/components/ClientDetails.jsx
 
-
 // src/components/ClientDetails.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
@@ -171,7 +170,12 @@ const ClientDetails = () => {
 
   return (
     <div className="client-details">
-      <h1>Client {clientId} Details</h1>
+      <div className="client-details-header">
+        <h1>Client {clientId} Details</h1>
+        <Link to="/dba-dashboard" className="back-button">
+          ← Back to Dashboard
+        </Link>
+      </div>
 
       {/* 🔹 Alert banners */}
       {alertMessages.length > 0 && (
@@ -303,10 +307,6 @@ const ClientDetails = () => {
           </tbody>
         </table>
       </div>
-
-      <p>
-        <Link to="/">Back to Dashboard</Link>
-      </p>
     </div>
   );
 };

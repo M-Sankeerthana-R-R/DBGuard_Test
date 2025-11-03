@@ -1,19 +1,20 @@
 // src/App.js
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Dashboard from "./components/Dashboard";
+import Login from "./components/Login";
+import DBADashboard from "./components/DBADashboard";
+import ClientDashboard from "./components/ClientDashboard";
 import ClientDetails from "./components/ClientDetails";
-import Logs from "./components/Logs";
 import "./App.css";
-import ClientConsole from "./components/Console"
+
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/" element={<Login />} />
+        <Route path="/dba-dashboard" element={<DBADashboard />} />
+        <Route path="/client-dashboard" element={<ClientDashboard />} />
         <Route path="/client/:clientId" element={<ClientDetails />} />
-        <Route path="/logs" element={<Logs />} />
-        <Route path="/console" element={<ClientConsole />} />
       </Routes>
     </Router>
   );
