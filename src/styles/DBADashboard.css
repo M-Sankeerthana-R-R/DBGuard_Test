@@ -21,6 +21,27 @@
 .subtitle {
   color: #888;
   font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.live-badge {
+  color: #4caf50;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
 }
 
 .logout-btn {
@@ -401,4 +422,41 @@
     position: static;
     margin-top: 15px;
   }
+}
+
+/* Query Item Badges */
+.query-header-dba {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.query-badge {
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.slow-badge {
+  background: #f44336;
+  color: #fff;
+}
+
+.normal-badge {
+  background: #4caf50;
+  color: #fff;
+}
+
+.query-type {
+  background: #2196f3;
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
 }

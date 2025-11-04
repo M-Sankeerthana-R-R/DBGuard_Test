@@ -232,15 +232,48 @@ def client_details(client_id):
         for _, row in df_client.iterrows():
             query_text = row.get('Query', '')
             
-            # 🔹 Use ML model for analysis
-            analysis = analyze_root_causes(query_text)
-            status = analysis.get("status", "")
-            alert = analysis.get("alert", "")
-            causes = analysis.get("root_causes", [])
-            score = analysis.get("score", 0.0)
+            # 🔹 Use stored analysis from CSV instead of re-analyzing
+            ranking_data = row.get('Ranking', '')
+            
+            # Try to parse the stored JSON ranking data
+            if ranking_data and isinstance(ranking_data, str):
+                try:
+                    stored_analysis = json.loads(ranking_data)
+                    status = stored_analysis.get("status", "Normal")
+                    root_cause = stored_analysis.get("root_cause", "None")
+                    score = stored_analysis.get("score", 0.0)
+                    
+                    # Format for frontend
+                    causes = [{"cause": root_cause, "score": score}] if root_cause != "None" else []
+                    
+                    # Generate alert message
+                    if status == "Slow":
+                        alert = f"🚨 Slow query detected (score: {score:.4f})"
+                    elif status == "Near Slow":
+                        alert = f"⚠️ Query nearing slowness threshold (score: {score:.4f})"
+                    else:
+                        alert = ""
+                        
+                except (json.JSONDecodeError, Exception) as e:
+                    print(f"[RANKING PARSE ERROR] {e}")
+                    # Fallback to re-analysis if parsing fails
+                    analysis = analyze_root_causes(query_text)
+                    status = analysis.get("status", "Normal")
+                    root_cause = analysis.get("root_cause", "None")
+                    score = analysis.get("score", 0.0)
+                    causes = [{"cause": root_cause, "score": score}] if root_cause != "None" else []
+                    alert = ""
+            else:
+                # No ranking data stored, re-analyze
+                analysis = analyze_root_causes(query_text)
+                status = analysis.get("status", "Normal")
+                root_cause = analysis.get("root_cause", "None")
+                score = analysis.get("score", 0.0)
+                causes = [{"cause": root_cause, "score": score}] if root_cause != "None" else []
+                alert = ""
 
             # Collect alerts (only if meaningful)
-            if status in ["Slow", "Near Slow"]:
+            if status in ["Slow", "Near Slow"] and alert:
                 alerts.append(alert)
 
             records.append({
@@ -275,11 +308,20 @@ def logs():
         return jsonify({"error": "Log file not found."}), 404
 
     try:
-        df = pd.read_csv(LOG_FILE_PATH, dtype=str)
+        # Read CSV with proper handling of multiline fields
+        df = pd.read_csv(LOG_FILE_PATH, dtype=str, quoting=1)  # quoting=1 is csv.QUOTE_ALL
         if 'Result' not in df.columns:
             df['Result'] = ""
-        return jsonify(df.to_dict(orient='records'))
+        
+        # Clean up any NaN values
+        df = df.fillna("")
+        
+        # Convert to records and return
+        records = df.to_dict(orient='records')
+        print(f"[API /logs] Returning {len(records)} log records")
+        return jsonify(records)
     except Exception as e:
+        print(f"[API /logs] Error: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 @app.route('/api/download')

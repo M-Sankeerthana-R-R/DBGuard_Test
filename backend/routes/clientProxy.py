@@ -8,7 +8,7 @@ client_bp = Blueprint("client_bp", __name__)
 # Store active client connections
 active_clients = {}
 
-SERVER_HOST = "192.168.29.85"
+SERVER_HOST = "127.0.0.1"
 SERVER_PORT = 5050
 SENSITIVE_COLUMNS = ["salary", "ssn", "password"]
 

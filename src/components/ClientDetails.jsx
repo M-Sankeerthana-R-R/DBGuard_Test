@@ -145,23 +145,41 @@ const ClientDetails = () => {
   const [alertMessages, setAlertMessages] = useState([]);
 
   useEffect(() => {
-    fetch(`/api/client/${clientId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setClientData(data);
+    const fetchClientData = () => {
+      fetch(`/api/client/${clientId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setClientData(data);
 
-        // 🔹 Collect unique alert messages (for top banners)
-        const msgs = [];
-        if (data.queries) {
-          data.queries.forEach((q) => {
-            if (q.Alert && q.Alert.trim() !== "") {
-              msgs.push(q.Alert);
-            }
-          });
-        }
-        setAlertMessages([...new Set(msgs)]);
-      })
-      .catch((err) => console.error("Error fetching client details:", err));
+          // 🔹 Collect unique alert messages from slow queries
+          const msgs = [];
+          if (data.queries) {
+            data.queries.forEach((q) => {
+              // Backend may provide Alert field if available
+              if (q.Alert && q.Alert.trim() !== "") {
+                msgs.push(q.Alert);
+              } else if (q.Status === "Slow") {
+                msgs.push("🚨 Slow query detected with performance issues");
+              } else if (q.Status === "Near Slow") {
+                msgs.push("⚠️ Query approaching slowness threshold");
+              }
+            });
+          }
+          setAlertMessages([...new Set(msgs)]);
+        })
+        .catch((err) => console.error("Error fetching client details:", err));
+    };
+
+    // Initial fetch
+    fetchClientData();
+
+    // Auto-refresh every 5 seconds
+    const interval = setInterval(() => {
+      fetchClientData();
+    }, 5000);
+
+    // Cleanup on unmount
+    return () => clearInterval(interval);
   }, [clientId]);
 
   if (!clientData) {
@@ -171,7 +189,10 @@ const ClientDetails = () => {
   return (
     <div className="client-details">
       <div className="client-details-header">
-        <h1>Client {clientId} Details</h1>
+        <div>
+          <h1>Client {clientId} Details</h1>
+          <span className="live-indicator">● Auto-refreshing every 5s</span>
+        </div>
         <Link to="/dba-dashboard" className="back-button">
           ← Back to Dashboard
         </Link>
@@ -237,7 +258,6 @@ const ClientDetails = () => {
               <th>Status</th>
               <th>Score</th>
               <th>Root Causes</th>
-              <th>Alert</th>
             </tr>
           </thead>
           <tbody>
@@ -266,9 +286,10 @@ const ClientDetails = () => {
                         ? "#ffb84d"
                         : "#4dff88",
                     fontWeight: "bold",
+                    textTransform: "uppercase",
                   }}
                 >
-                  {q.Status || "—"}
+                  {q.Status || "NORMAL"}
                 </td>
 
                 <td>{q.Score ? q.Score.toFixed(3) : "—"}</td>
@@ -280,24 +301,6 @@ const ClientDetails = () => {
                         (r) => `${r.cause}: ${r.score.toFixed(3)}`
                       ).join("\n")}
                     </pre>
-                  ) : (
-                    "—"
-                  )}
-                </td>
-
-                <td>
-                  {q.Alert ? (
-                    <span
-                      className={`alert-tag ${
-                        q.Alert.toLowerCase().includes("highly")
-                          ? "alert-high"
-                          : q.Alert.toLowerCase().includes("slightly")
-                          ? "alert-medium"
-                          : "alert-low"
-                      }`}
-                    >
-                      {q.Alert}
-                    </span>
                   ) : (
                     "—"
                   )}

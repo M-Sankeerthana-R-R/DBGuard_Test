@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>API Test - DB Guard</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background: #1e1e1e;
+        color: #e0e0e0;
+      }
+      .section {
+        margin: 20px 0;
+        padding: 15px;
+        background: #2d2d2d;
+        border-radius: 5px;
+      }
+      button {
+        padding: 10px 20px;
+        margin: 5px;
+        background: #42a5f5;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #1976d2;
+      }
+      pre {
+        background: #1a1a1a;
+        padding: 10px;
+        border-radius: 4px;
+        overflow-x: auto;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+      .status {
+        padding: 5px 10px;
+        border-radius: 3px;
+        display: inline-block;
+        margin: 5px 0;
+      }
+      .success {
+        background: #4caf50;
+      }
+      .error {
+        background: #f44336;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>DB Guard API Tester</h1>
+
+    <div class="section">
+      <h2>Test /api/logs</h2>
+      <button onclick="testLogs()">Test Logs Endpoint</button>
+      <div id="logsStatus"></div>
+      <pre id="logsResult"></pre>
+    </div>
+
+    <div class="section">
+      <h2>Test /api/dashboard</h2>
+      <button onclick="testDashboard()">Test Dashboard Endpoint</button>
+      <div id="dashboardStatus"></div>
+      <pre id="dashboardResult"></pre>
+    </div>
+
+    <script>
+      async function testLogs() {
+        const statusDiv = document.getElementById("logsStatus");
+        const resultDiv = document.getElementById("logsResult");
+
+        try {
+          statusDiv.innerHTML = '<span class="status">Fetching...</span>';
+          const response = await fetch("http://localhost:5000/api/logs");
+          const data = await response.json();
+
+          if (response.ok) {
+            statusDiv.innerHTML = `<span class="status success">✓ Success - Returned ${
+              Array.isArray(data) ? data.length : 0
+            } records</span>`;
+            resultDiv.textContent = JSON.stringify(data, null, 2);
+
+            // Additional analysis
+            if (Array.isArray(data) && data.length > 0) {
+              const slowCount = data.filter(
+                (log) => log.SlowQuery === "True" || log.SlowQuery === true
+              ).length;
+              statusDiv.innerHTML += `<br><span class="status">Total: ${data.length}, Slow: ${slowCount}</span>`;
+            }
+          } else {
+            statusDiv.innerHTML = `<span class="status error">✗ Error: ${response.status}</span>`;
+            resultDiv.textContent = JSON.stringify(data, null, 2);
+          }
+        } catch (error) {
+          statusDiv.innerHTML = `<span class="status error">✗ Network Error</span>`;
+          resultDiv.textContent = error.message;
+        }
+      }
+
+      async function testDashboard() {
+        const statusDiv = document.getElementById("dashboardStatus");
+        const resultDiv = document.getElementById("dashboardResult");
+
+        try {
+          statusDiv.innerHTML = '<span class="status">Fetching...</span>';
+          const response = await fetch("http://localhost:5000/api/dashboard");
+          const data = await response.json();
+
+          if (response.ok) {
+            statusDiv.innerHTML =
+              '<span class="status success">✓ Success</span>';
+            resultDiv.textContent = JSON.stringify(data, null, 2);
+          } else {
+            statusDiv.innerHTML = `<span class="status error">✗ Error: ${response.status}</span>`;
+            resultDiv.textContent = JSON.stringify(data, null, 2);
+          }
+        } catch (error) {
+          statusDiv.innerHTML = `<span class="status error">✗ Network Error</span>`;
+          resultDiv.textContent = error.message;
+        }
+      }
+
+      // Auto-test on load
+      window.onload = () => {
+        testLogs();
+        testDashboard();
+      };
+    </script>
+  </body>
+</html>

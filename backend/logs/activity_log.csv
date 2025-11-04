@@ -151,3 +151,89 @@ Timestamp,ClientID,QueryType,Query,ExecutionTime,SlowQuery,Result,Ranking
 (6, 'Hermoine', 'Manager', 'hermoine@hogwarts.com', datetime.date(2023, 9, 8))
 (7, 'Ron', 'Engineering', 'ron@example.com', datetime.date(2023, 9, 7))","{""status"": ""Normal"", ""root_cause"": """", ""score"": 0.3909}"
 2025-11-01 00:49:40,1,SELECT,"SELECT name, salary FROM employees JOIN departments",3.2,True,Error executing select: 1146 (42S02): Table 'mydb.departments' doesn't exist,"{""status"": ""Normal"", ""root_cause"": """", ""score"": 0.3826}"
+2025-11-04 13:45:35,3,SELECT,"SELECT * FROM employees e1 
+JOIN employees e2 ON e1.id = e2.id 
+JOIN employees e3 ON e2.id = e3.id 
+WHERE e1.salary > 0 
+ORDER BY e1.name;",6.08,True,"(1, 'John Doe', 'john@example.com')
+(2, 'Jane Smith', 'jane@example.com')","{""status"": ""Normal"", ""root_cause"": """", ""score"": 0.3875}"
+2025-11-04 14:03:58,3,SELECT,"SELECT * FROM employees e1 
+JOIN employees e2 ON e1.id = e2.id 
+JOIN employees e3 ON e2.id = e3.id 
+WHERE e1.salary > 0 
+ORDER BY e1.name;",4.16,True,"(1, 'John Doe', 'john@example.com')
+(2, 'Jane Smith', 'jane@example.com')","{""status"": ""Normal"", ""root_cause"": """", ""score"": 0.3875}"
+2025-11-04 15:11:58,3,SELECT,"SELECT * FROM employees e1 
+JOIN employees e2 ON e1.id = e2.id 
+JOIN employees e3 ON e2.id = e3.id 
+WHERE e1.salary > 0 
+ORDER BY e1.name;",12.43,True,"(1, 'John Doe', 'john@example.com')
+(2, 'Jane Smith', 'jane@example.com')","{""status"": ""Normal"", ""root_cause"": """", ""score"": 0.3875}"
+2025-11-04 15:12:49,3,SELECT,select * from employees;,5.56,True,"(1, 'John Doe', 'john@example.com')
+(2, 'Jane Smith', 'jane@example.com')","{""status"": ""Normal"", ""root_cause"": """", ""score"": 0.3908}"
+2025-11-04 15:14:19,3,SELECT,"SELECT * FROM employees e1 
+JOIN employees e2 ON e1.id = e2.id 
+JOIN employees e3 ON e2.id = e3.id 
+WHERE e1.salary > 0 
+ORDER BY e1.name;",7.12,True,"(1, 'John Doe', 'john@example.com')
+(2, 'Jane Smith', 'jane@example.com')","{""status"": ""Normal"", ""root_cause"": """", ""score"": 0.3875}"
+2025-11-04 15:15:59,3,SELECT,"SELECT * FROM employees e1 
+JOIN employees e2 ON e1.id = e2.id 
+JOIN employees e3 ON e2.id = e3.id 
+WHERE e1.salary > 0 
+ORDER BY e1.name;",4.93,True,"(1, 'John Doe', 'john@example.com')
+(2, 'Jane Smith', 'jane@example.com')","{""status"": ""Slow"", ""root_cause"": ""function_based_filter"", ""score"": 0.89}"
+2025-11-04 15:43:43,3,SELECT,"SELECT * FROM employees e1 
+JOIN employees e2 ON e1.id = e2.id 
+JOIN employees e3 ON e2.id = e3.id 
+WHERE e1.salary > 0 
+ORDER BY e1.name;",3.81,True,"(1, 'John Doe', 'john@example.com')
+(2, 'Jane Smith', 'jane@example.com')","{""status"": ""Normal"", ""root_cause"": """", ""score"": 0.3875}"
+2025-11-04 15:48:08,3,SELECT,"SELECT * FROM employees e1 
+JOIN employees e2 ON e1.id = e2.id 
+JOIN employees e3 ON e2.id = e3.id 
+WHERE e1.salary > 0 
+ORDER BY e1.name;",2.59,True,"(1, 'John Doe', 'john@example.com')
+(2, 'Jane Smith', 'jane@example.com')","{""status"": ""Normal"", ""root_cause"": """", ""score"": 0.3875}"
+2025-11-04 15:49:01,3,SELECT,"SELECT * FROM employees e1 
+JOIN employees e2 ON e1.id = e2.id 
+JOIN employees e3 ON e2.id = e3.id 
+WHERE e1.salary > 0 
+ORDER BY e1.name;",1.97,False,"(1, 'John Doe', 'john@example.com')
+(2, 'Jane Smith', 'jane@example.com')","{""status"": ""Normal"", ""root_cause"": """", ""score"": 0.3875}"
+2025-11-04 15:49:37,3,SELECT,"SELECT * FROM employees e1 
+JOIN employees e2 ON e1.id = e2.id 
+JOIN employees e3 ON e2.id = e3.id 
+WHERE e1.salary > 0 
+ORDER BY e1.name;",2.89,True,"(1, 'John Doe', 'john@example.com')
+(2, 'Jane Smith', 'jane@example.com')","{""status"": ""Slow"", ""root_cause"": ""function_based_filter"", ""score"": 0.89}"
+2025-11-04 15:50:47,3,SELECT,"SELECT * FROM employees e1 
+JOIN employees e2 ON e1.id = e2.id 
+JOIN employees e3 ON e2.id = e3.id 
+WHERE e1.salary > 0 
+ORDER BY e1.name;",2.76,True,"(1, 'John Doe', 'john@example.com')
+(2, 'Jane Smith', 'jane@example.com')","{""status"": ""Slow"", ""root_cause"": ""function_based_filter"", ""score"": 0.89}"
+2025-11-04 15:51:10,3,SELECT,"SELECT * FROM employees e1 
+JOIN employees e2 ON e1.id = e2.id 
+JOIN employees e3 ON e2.id = e3.id 
+WHERE e1.salary > 0 
+ORDER BY e1.name;",2.1,True,"(1, 'John Doe', 'john@example.com')
+(2, 'Jane Smith', 'jane@example.com')","{""status"": ""Slow"", ""root_cause"": ""function_based_filter"", ""score"": 0.89}"
+2025-11-04 16:01:32,3,SELECT,"SELECT * FROM employees e1 
+JOIN employees e2 ON e1.id = e2.id 
+JOIN employees e3 ON e2.id = e3.id 
+WHERE e1.salary > 0 
+ORDER BY e1.name;",3.6,True,"(1, 'John Doe', 'john@example.com')
+(2, 'Jane Smith', 'jane@example.com')","{""status"": ""Slow"", ""root_cause"": ""function_based_filter"", ""score"": 0.89}"
+2025-11-04 16:11:09,3,SELECT,"SELECT * FROM employees e1 
+JOIN employees e2 ON e1.id = e2.id 
+JOIN employees e3 ON e2.id = e3.id 
+WHERE e1.salary > 0 
+ORDER BY e1.name;",3.42,True,"(1, 'John Doe', 'john@example.com')
+(2, 'Jane Smith', 'jane@example.com')","{""status"": ""Slow"", ""root_cause"": ""function_based_filter"", ""score"": 0.89}"
+2025-11-04 16:17:29,3,SELECT,"SELECT * FROM employees e1 
+JOIN employees e2 ON e1.id = e2.id 
+JOIN employees e3 ON e2.id = e3.id 
+WHERE e1.salary > 0 
+ORDER BY e1.name;",2.5,True,"(1, 'John Doe', 'john@example.com')
+(2, 'Jane Smith', 'jane@example.com')","{""status"": ""Slow"", ""root_cause"": ""function_based_filter"", ""score"": 0.89}"

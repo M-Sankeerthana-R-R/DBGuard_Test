@@ -733,10 +733,10 @@ from monitor.slow_query_analyzer import analyze_root_causes
 # -------------------------------
 conn = mysql.connector.connect(
     host='localhost',
-    port=3307,
+    port=3306,
     user='root',
-    password='rootpassword',
-    database='mydb'
+    password='root',
+    database='rcranker_test'
 )
 
 # -------------------------------
@@ -745,7 +745,7 @@ conn = mysql.connector.connect(
 context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 context.load_cert_chain(certfile="server.crt", keyfile="server.key")
 
-HOST = '0.0.0.0'
+HOST = '127.0.0.1'
 PORT = 5050
 sensitive_columns = ['salary', 'ssn', 'password']
 

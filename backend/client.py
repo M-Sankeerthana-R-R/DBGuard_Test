@@ -7,7 +7,7 @@
 import socket
 import ssl
 
-HOST = '10.208.18.195'  # replace with your server IP
+HOST = '127.0.0.1'  # replace with your server IP
 PORT = 5050
 
 context = ssl.create_default_context()

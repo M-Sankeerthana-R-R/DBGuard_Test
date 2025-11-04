@@ -25,40 +25,156 @@ const DBADashboard = () => {
       return;
     }
 
-    // Fetch dashboard data
-    fetch("/api/dashboard")
-      .then((res) => res.json())
-      .then((data) => {
-        setClientData(data.client_counts || {});
-        setTimelineData(data.timeline || []);
-        setAlerts(data.alerts || []);
-        setTotalQueries(data.total_queries || 0);
-        setSlowQueries(data.slow_queries || 0);
-        setAvgExecutionTime(data.avg_execution_time || 0);
-        setActiveClients(data.active_clients || 0);
-      });
+    const fetchAllData = () => {
+      // Fetch logs first to calculate everything from it
+      fetch("/api/logs")
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          return res.json();
+        })
+        .then((data) => {
+          console.log("[DBA Dashboard] Fetched logs:", data);
 
-    // Fetch logs
-    fetch("/api/logs")
-      .then((res) => res.json())
-      .then((data) => setLogs(data || []))
-      .catch((err) => console.error("Error fetching logs:", err));
+          // Handle both array and error object responses
+          if (data.error) {
+            console.error("[DBA Dashboard] API error:", data.error);
+            setLogs([]);
+            setAllQueries([]);
+            setAlerts([]);
+            return;
+          }
 
-    // Fetch all queries from all clients
-    fetch("/api/all_queries")
-      .then((res) => res.json())
-      .then((data) => {
-        setAllQueries(data || []);
+          const allLogs = Array.isArray(data) ? data : [];
+          console.log("[DBA Dashboard] Processed logs count:", allLogs.length);
 
-        // Calculate query type distribution
-        const types = {};
-        data.forEach((q) => {
-          const type = q.QueryType || "UNKNOWN";
-          types[type] = (types[type] || 0) + 1;
+          // Sort by timestamp descending (most recent first)
+          allLogs.sort((a, b) => {
+            const dateA = new Date(a.Timestamp);
+            const dateB = new Date(b.Timestamp);
+            return dateB - dateA;
+          });
+
+          setLogs(allLogs);
+          setAllQueries(allLogs);
+
+          // Calculate average execution time from logs
+          if (allLogs.length > 0) {
+            const totalExecTime = allLogs.reduce((sum, log) => {
+              const execTime = parseFloat(log.ExecutionTime) || 0;
+              return sum + execTime;
+            }, 0);
+            const avgTime = totalExecTime / allLogs.length;
+            setAvgExecutionTime(avgTime * 1000); // Convert to ms
+            console.log(
+              "[DBA Dashboard] Average execution time:",
+              avgTime * 1000,
+              "ms"
+            );
+          } else {
+            setAvgExecutionTime(0);
+          }
+
+          // Calculate query type distribution
+          const types = {};
+          allLogs.forEach((q) => {
+            const type = q.QueryType || "UNKNOWN";
+            types[type] = (types[type] || 0) + 1;
+          });
+          setQueryTypeData(types);
+          console.log("[DBA Dashboard] Query type distribution:", types);
+
+          // Generate alerts from slow queries
+          const slowAlerts = allLogs
+            .filter((log) => {
+              const isSlowQuery =
+                log.SlowQuery === "True" ||
+                log.SlowQuery === true ||
+                log.SlowQuery === "true" ||
+                log.SlowQuery === 1 ||
+                log.SlowQuery === "1";
+              return isSlowQuery;
+            })
+            .slice(0, 5) // Get last 5 slow queries
+            .map((log) => {
+              // Try to parse ranking data for root cause
+              let rootCause = "Performance issue detected";
+              try {
+                if (log.Ranking && log.Ranking.trim() !== "") {
+                  const ranking = JSON.parse(log.Ranking);
+                  if (ranking.root_cause && ranking.root_cause !== "None") {
+                    rootCause = ranking.root_cause.replace(/_/g, " ");
+                  } else if (Array.isArray(ranking) && ranking.length > 0) {
+                    // Handle old format with array of causes
+                    rootCause = ranking[0].cause.replace(/_/g, " ");
+                  }
+                }
+              } catch (e) {
+                console.error("[DBA Dashboard] Error parsing ranking:", e);
+              }
+
+              return {
+                timestamp: log.Timestamp,
+                client: `Client ${log.ClientID}`,
+                message: `Slow query: ${rootCause}`,
+              };
+            });
+
+          console.log("[DBA Dashboard] Generated alerts:", slowAlerts);
+          setAlerts(slowAlerts);
+        })
+        .catch((err) => {
+          console.error("[DBA Dashboard] Error fetching logs:", err);
+          setLogs([]);
+          setAllQueries([]);
+          setAlerts([]);
         });
-        setQueryTypeData(types);
-      })
-      .catch((err) => console.error("Error fetching queries:", err));
+
+      // Fetch dashboard data for client counts and timeline
+      fetch("/api/dashboard")
+        .then((res) => res.json())
+        .then((data) => {
+          setClientData(data.client_counts || {});
+
+          // Backend sends different field names, map them correctly
+          const slowCount = data.slow_counts?.Slow || 0;
+          const fastCount = data.slow_counts?.Fast || 0;
+          const totalQueriesCount = slowCount + fastCount;
+
+          setTotalQueries(totalQueriesCount);
+          setSlowQueries(slowCount);
+          setActiveClients(data.current_connected || 0);
+
+          // Build timeline from five_min_counts
+          const timeline = [];
+          if (data.five_min_counts) {
+            Object.entries(data.five_min_counts).forEach(
+              ([timestamp, count]) => {
+                timeline.push({
+                  timestamp: timestamp,
+                  count: count,
+                  slow: false,
+                  client: "Multiple",
+                });
+              }
+            );
+          }
+          setTimelineData(timeline);
+        })
+        .catch((err) => console.error("Error fetching dashboard:", err));
+    };
+
+    // Initial fetch
+    fetchAllData();
+
+    // Auto-refresh every 5 seconds
+    const interval = setInterval(() => {
+      fetchAllData();
+    }, 5000);
+
+    // Cleanup on unmount
+    return () => clearInterval(interval);
   }, [navigate]);
 
   const handleLogout = () => {
@@ -75,8 +191,13 @@ const DBADashboard = () => {
   return (
     <div className="dba-dashboard">
       <div className="dba-header">
-        <h1>DBA Dashboard</h1>
-        <p className="subtitle">System Monitoring & Analytics</p>
+        <div>
+          <h1>DBA Dashboard</h1>
+          <p className="subtitle">
+            System Monitoring & Analytics
+            <span className="live-badge">● LIVE</span>
+          </p>
+        </div>
         <button className="logout-btn" onClick={handleLogout}>
           Logout
         </button>
@@ -94,7 +215,9 @@ const DBADashboard = () => {
         </div>
         <div className="metric-card">
           <h3>Avg Execution Time</h3>
-          <p className="metric-value">{avgExecutionTime.toFixed(2)}ms</p>
+          <p className="metric-value">
+            {avgExecutionTime > 0 ? avgExecutionTime.toFixed(2) + "ms" : "N/A"}
+          </p>
         </div>
         <div className="metric-card">
           <h3>Active Clients</h3>
@@ -110,26 +233,26 @@ const DBADashboard = () => {
             data={[
               {
                 x: timelineData.map((d) => d.timestamp),
-                y: timelineData.map((d) => (d.slow ? 300 : 100)),
-                text: timelineData.map((d) => d.client),
-                mode: "markers",
+                y: timelineData.map((d) => d.count || 0),
+                text: timelineData.map((d) => `${d.count} queries`),
+                mode: "lines+markers",
                 type: "scatter",
                 marker: {
-                  color: timelineData.map((d) =>
-                    d.slow ? "#ef5350" : "#26c6da"
-                  ),
-                  size: 10,
+                  color: "#26c6da",
+                  size: 8,
+                },
+                line: {
+                  color: "#26c6da",
+                  width: 2,
                 },
                 name: "Queries",
               },
             ]}
             layout={{
               title: "",
-              xaxis: { title: "" },
+              xaxis: { title: "Time (5-minute intervals)" },
               yaxis: {
-                title: "Query Type",
-                tickvals: [100, 300],
-                ticktext: ["Normal Query (< 500ms)", "Slow Query (> 500ms)"],
+                title: "Number of Queries",
               },
               ...darkLayout,
               height: 350,
@@ -140,11 +263,11 @@ const DBADashboard = () => {
         </div>
         <div className="legend">
           <span className="legend-item">
-            <span className="legend-dot normal"></span> Normal Query (&lt;
-            500ms)
-          </span>
-          <span className="legend-item">
-            <span className="legend-dot slow"></span> Slow Query (&gt; 500ms)
+            <span
+              className="legend-dot"
+              style={{ background: "#26c6da" }}
+            ></span>{" "}
+            Query Activity (5-minute intervals)
           </span>
         </div>
       </div>
@@ -232,28 +355,29 @@ const DBADashboard = () => {
                 className="legend-dot"
                 style={{ background: "#42a5f5" }}
               ></span>{" "}
-              SELECT: 1
+              SELECT: {queryTypeData.SELECT || 0}
             </span>
             <span className="legend-item">
               <span
                 className="legend-dot"
                 style={{ background: "#66bb6a" }}
               ></span>{" "}
-              UPDATE: 0
+              UPDATE:{" "}
+              {queryTypeData.UPDATE || queryTypeData["NEEDS-APPROVAL"] || 0}
             </span>
             <span className="legend-item">
               <span
                 className="legend-dot"
                 style={{ background: "#ffa726" }}
               ></span>{" "}
-              INSERT: 0
+              INSERT: {queryTypeData.INSERT || 0}
             </span>
             <span className="legend-item">
               <span
                 className="legend-dot"
                 style={{ background: "#ef5350" }}
               ></span>{" "}
-              DELETE: 0
+              DELETE: {queryTypeData.DELETE || 0}
             </span>
           </div>
         </div>
@@ -264,7 +388,7 @@ const DBADashboard = () => {
         <div className="info-section">
           <h2>Recent Alerts</h2>
           <div className="alerts-container">
-            {alerts.length > 0 ? (
+            {alerts && alerts.length > 0 ? (
               alerts.map((alert, i) => (
                 <div key={i} className="alert-item">
                   ⚠️ [{alert.timestamp}] <strong>{alert.client}</strong>:{" "}
@@ -272,30 +396,46 @@ const DBADashboard = () => {
                 </div>
               ))
             ) : (
-              <p className="no-data">No alerts</p>
+              <p className="no-data">
+                No alerts{" "}
+                {alerts
+                  ? `(${alerts.length} alerts in state)`
+                  : "(alerts is null/undefined)"}
+              </p>
             )}
           </div>
         </div>
 
         <div className="info-section">
-          <h2>All Queries</h2>
+          <h2>Recent Queries</h2>
           <div className="queries-list">
-            {allQueries.length > 0 ? (
+            {allQueries && allQueries.length > 0 ? (
               allQueries.slice(0, 5).map((query, i) => (
                 <div key={i} className="query-item">
-                  <div className="query-text">{query.Query}</div>
+                  <div className="query-header-dba">
+                    <div className="query-text">{query.Query}</div>
+                    {query.SlowQuery === "True" ||
+                    query.SlowQuery === true ||
+                    query.SlowQuery === "true" ? (
+                      <span className="query-badge slow-badge">SLOW</span>
+                    ) : (
+                      <span className="query-badge normal-badge">NORMAL</span>
+                    )}
+                  </div>
                   <div className="query-meta">
-                    <span>{query.ExecutionTime}</span>
-                    <span
-                      className={`rows-badge ${query.SlowQuery ? "slow" : ""}`}
-                    >
-                      {query.Result || "44606 rows"}
-                    </span>
+                    <span>Client {query.ClientID}</span>
+                    <span>{query.ExecutionTime}s</span>
+                    <span className="query-type">{query.QueryType}</span>
                   </div>
                 </div>
               ))
             ) : (
-              <p className="no-data">No queries executed yet</p>
+              <p className="no-data">
+                No queries executed yet{" "}
+                {allQueries
+                  ? `(${allQueries.length} queries in state)`
+                  : "(queries is null/undefined)"}
+              </p>
             )}
           </div>
         </div>
@@ -339,32 +479,58 @@ const DBADashboard = () => {
             </thead>
             <tbody>
               {logs && logs.length > 0 ? (
-                logs.slice(0, 10).map((row, index) => (
-                  <tr key={index}>
-                    <td>{row.Timestamp}</td>
-                    <td>{row.ClientID}</td>
-                    <td>{row.QueryType}</td>
-                    <td>
-                      <pre className="query-cell">{row.Query}</pre>
-                    </td>
-                    <td>{row.ExecutionTime}</td>
-                    <td>
-                      <span
-                        className={`status-badge ${
-                          row.SlowQuery ? "slow" : "normal"
-                        }`}
-                      >
-                        {row.SlowQuery ? "Yes" : "No"}
-                      </span>
-                    </td>
-                    <td>
-                      <pre className="result-cell">{row.Result}</pre>
-                    </td>
-                    <td>
-                      <pre className="ranking-cell">{row.Ranking}</pre>
-                    </td>
-                  </tr>
-                ))
+                logs.slice(0, 10).map((row, index) => {
+                  // Parse SlowQuery properly (can be "True", true, "true", 1, etc.)
+                  const isSlowQuery =
+                    row.SlowQuery === "True" ||
+                    row.SlowQuery === true ||
+                    row.SlowQuery === "true" ||
+                    row.SlowQuery === 1;
+
+                  // Try to parse and format ranking data nicely
+                  let rankingDisplay = row.Ranking || "N/A";
+                  try {
+                    if (row.Ranking && row.Ranking.trim() !== "") {
+                      const ranking = JSON.parse(row.Ranking);
+                      if (ranking.status && ranking.root_cause) {
+                        rankingDisplay = `${ranking.status} - ${ranking.root_cause}`;
+                      }
+                    }
+                  } catch (e) {
+                    // Keep original string if parsing fails
+                  }
+
+                  return (
+                    <tr key={index}>
+                      <td>{row.Timestamp}</td>
+                      <td>{row.ClientID}</td>
+                      <td>{row.QueryType}</td>
+                      <td>
+                        <pre className="query-cell">{row.Query}</pre>
+                      </td>
+                      <td>{row.ExecutionTime}s</td>
+                      <td>
+                        <span
+                          className={`status-badge ${
+                            isSlowQuery ? "slow" : "normal"
+                          }`}
+                        >
+                          {isSlowQuery ? "Yes" : "No"}
+                        </span>
+                      </td>
+                      <td>
+                        <pre className="result-cell">
+                          {row.Result && row.Result.length > 100
+                            ? row.Result.substring(0, 100) + "..."
+                            : row.Result}
+                        </pre>
+                      </td>
+                      <td>
+                        <pre className="ranking-cell">{rankingDisplay}</pre>
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
                   <td colSpan="8">No logs available</td>
