@@ -187,7 +187,19 @@ const ClientDashboard = () => {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    // Call disconnect API to update connected clients
+    try {
+      await fetch("/api/disconnect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clientId }),
+      });
+    } catch (error) {
+      console.error("Error disconnecting:", error);
+    }
+
+    // Clear session and navigate to login
     sessionStorage.clear();
     navigate("/");
   };

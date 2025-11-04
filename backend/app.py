@@ -76,12 +76,13 @@ def dashboard():
 
         print(f"[API /dashboard] Client counts: {client_counts}")
         print(f"[API /dashboard] Active clients (last 10 min): {recent_clients}")
+        print(f"[API /dashboard] Currently connected: {len(connected_clients)}")
         print(f"[API /dashboard] Total unique clients: {total_unique_clients}")
 
         return jsonify({
             "total_clients": total_unique_clients,
-            "current_connected": len(connected_clients) if connected_clients else recent_clients,
-            "active_clients_10min": int(recent_clients),
+            "current_connected": len(connected_clients),  # Only show actually connected clients
+            "active_clients_10min": int(recent_clients),  # Keep this for reference
             "connected_clients": connected_clients,
             "client_counts": client_counts,
             "slow_counts": slow_counts,

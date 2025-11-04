@@ -149,12 +149,14 @@ const DBADashboard = () => {
           setTotalQueries(totalQueriesCount);
           setSlowQueries(slowCount);
 
-          // Use backend-calculated active clients (last 10 minutes)
-          // Fall back to current_connected if available
-          const activeClientCount =
-            data.active_clients_10min || data.current_connected || 0;
+          // Show currently connected clients (actually logged in)
+          // This will show 0 when everyone logs out
+          const activeClientCount = data.current_connected || 0;
           setActiveClients(activeClientCount);
-          console.log("[DBA Dashboard] Active clients:", activeClientCount);
+          console.log(
+            "[DBA Dashboard] Active clients (currently connected):",
+            activeClientCount
+          );
 
           // Build timeline from five_min_counts
           const timeline = [];
