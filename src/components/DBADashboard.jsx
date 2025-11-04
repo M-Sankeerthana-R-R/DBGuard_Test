@@ -135,7 +135,11 @@ const DBADashboard = () => {
       fetch("/api/dashboard")
         .then((res) => res.json())
         .then((data) => {
-          setClientData(data.client_counts || {});
+          console.log("[DBA Dashboard] Dashboard data:", data);
+
+          const clientCounts = data.client_counts || {};
+          setClientData(clientCounts);
+          console.log("[DBA Dashboard] Client counts:", clientCounts);
 
           // Backend sends different field names, map them correctly
           const slowCount = data.slow_counts?.Slow || 0;
@@ -144,7 +148,13 @@ const DBADashboard = () => {
 
           setTotalQueries(totalQueriesCount);
           setSlowQueries(slowCount);
-          setActiveClients(data.current_connected || 0);
+
+          // Use backend-calculated active clients (last 10 minutes)
+          // Fall back to current_connected if available
+          const activeClientCount =
+            data.active_clients_10min || data.current_connected || 0;
+          setActiveClients(activeClientCount);
+          console.log("[DBA Dashboard] Active clients:", activeClientCount);
 
           // Build timeline from five_min_counts
           const timeline = [];
@@ -277,27 +287,52 @@ const DBADashboard = () => {
         <div className="chart-section half">
           <h2>Client Activity</h2>
           <div className="chart-container">
-            <Plot
-              data={[
-                {
-                  labels: Object.keys(clientData),
-                  values: Object.values(clientData),
-                  type: "bar",
-                  marker: {
-                    color: "#42a5f5",
+            {Object.keys(clientData).length > 0 ? (
+              <Plot
+                data={[
+                  {
+                    x: Object.keys(clientData),
+                    y: Object.values(clientData),
+                    type: "bar",
+                    marker: {
+                      color: "#42a5f5",
+                    },
+                    text: Object.values(clientData).map((v) => `${v} queries`),
+                    textposition: "auto",
+                    hovertemplate:
+                      "<b>Client %{x}</b><br>%{y} queries<extra></extra>",
                   },
-                },
-              ]}
-              layout={{
-                title: "",
-                xaxis: { title: "Client ID" },
-                yaxis: { title: "Total Queries" },
-                ...darkLayout,
-                showlegend: false,
-              }}
-              style={{ width: "100%", height: "100%" }}
-              config={{ responsive: true }}
-            />
+                ]}
+                layout={{
+                  title: "",
+                  xaxis: {
+                    title: "Client ID",
+                    type: "category",
+                  },
+                  yaxis: {
+                    title: "Total Queries",
+                    rangemode: "tozero",
+                  },
+                  ...darkLayout,
+                  showlegend: false,
+                  bargap: 0.3,
+                }}
+                style={{ width: "100%", height: "100%" }}
+                config={{ responsive: true }}
+              />
+            ) : (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  height: "100%",
+                  color: "#888",
+                }}
+              >
+                No client activity data available
+              </div>
+            )}
           </div>
           <div className="legend">
             <span className="legend-item">

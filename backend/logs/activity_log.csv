@@ -237,3 +237,15 @@ JOIN employees e3 ON e2.id = e3.id
 WHERE e1.salary > 0 
 ORDER BY e1.name;",2.5,True,"(1, 'John Doe', 'john@example.com')
 (2, 'Jane Smith', 'jane@example.com')","{""status"": ""Slow"", ""root_cause"": ""function_based_filter"", ""score"": 0.89}"
+2025-11-04 19:12:38,3,SELECT,"SELECT * FROM employees e1 
+JOIN employees e2 ON e1.id = e2.id 
+JOIN employees e3 ON e2.id = e3.id 
+WHERE e1.salary > 0 
+ORDER BY e1.name;",2.21,True,"(1, 'John Doe', 'john@example.com')
+(2, 'Jane Smith', 'jane@example.com')","{""status"": ""Slow"", ""root_cause"": ""function_based_filter"", ""score"": 0.89}"
+2025-11-04 19:13:28,2,SELECT,"SELECT * FROM employees e1 
+JOIN employees e2 ON e1.id = e2.id 
+JOIN employees e3 ON e2.id = e3.id 
+WHERE e1.salary > 0 
+ORDER BY e1.name;",3.14,True,"(1, 'John Doe', 'john@example.com')
+(2, 'Jane Smith', 'jane@example.com')","{""status"": ""Slow"", ""root_cause"": ""function_based_filter"", ""score"": 0.89}"

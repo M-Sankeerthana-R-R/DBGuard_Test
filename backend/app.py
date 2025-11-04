@@ -43,7 +43,10 @@ def dashboard():
             df['SlowQuery'] = False
 
         total_unique_clients = int(df['ClientID'].nunique())
-        client_counts = df['ClientID'].value_counts().to_dict()
+        
+        # Convert client_counts to have string keys and int values, sorted by client ID
+        client_counts_raw = df['ClientID'].value_counts().to_dict()
+        client_counts = {str(k): int(v) for k, v in sorted(client_counts_raw.items(), key=lambda x: str(x[0]))}
 
         slow_counts = {
             'Slow': int(df['SlowQuery'].sum()),
@@ -58,6 +61,11 @@ def dashboard():
             for timestamp, count in five_min_counts_series.items()
         }
 
+        # Calculate active clients (clients with queries in last 10 minutes)
+        now = pd.Timestamp.now()
+        ten_min_ago = now - pd.Timedelta(minutes=10)
+        recent_clients = df[df['Timestamp'] >= ten_min_ago]['ClientID'].nunique()
+
         connected_clients = []
         if os.path.exists(CONNECTED_FILE):
             with open(CONNECTED_FILE, 'r', encoding='utf-8') as f:
@@ -66,9 +74,14 @@ def dashboard():
                 except:
                     connected_clients = []
 
+        print(f"[API /dashboard] Client counts: {client_counts}")
+        print(f"[API /dashboard] Active clients (last 10 min): {recent_clients}")
+        print(f"[API /dashboard] Total unique clients: {total_unique_clients}")
+
         return jsonify({
             "total_clients": total_unique_clients,
-            "current_connected": len(connected_clients),
+            "current_connected": len(connected_clients) if connected_clients else recent_clients,
+            "active_clients_10min": int(recent_clients),
             "connected_clients": connected_clients,
             "client_counts": client_counts,
             "slow_counts": slow_counts,
