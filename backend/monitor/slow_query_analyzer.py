@@ -218,16 +218,16 @@ def analyze_root_causes(query: str):
         score = torch.sigmoid(raw_output)[0][0].item()
 
     # Clamp extreme scores
-    # score = max(0.0, min(score, 1.0))
-    score = 0.89
+    score = max(0.0, min(score, 1.0))
+    # score = 0.89
 
-    # Categorize
-    if score >= 0.75:
+    # Categorize with lower thresholds for better detection
+    if score >= 0.40:
         status = "Slow"
         alert = "🚨 Model detected likely performance issue."
         predicted_index = int((score * len(class_names)) % len(class_names))
         predicted_cause = class_names[predicted_index]
-    elif 0.55 <= score < 0.75:
+    elif 0.30 <= score < 0.40:
         status = "Near Slow"
         alert = "⚠️ Query nearing slowness threshold."
         predicted_index = int((score * len(class_names)) % len(class_names))

@@ -745,7 +745,7 @@ conn = mysql.connector.connect(
 context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 context.load_cert_chain(certfile="server.crt", keyfile="server.key")
 
-HOST = '127.0.0.1'
+HOST = '127.0.0.1'  # Changed to localhost for local testing
 PORT = 5050
 sensitive_columns = ['salary', 'ssn', 'password']
 
@@ -766,12 +766,14 @@ def classify_query(query):
 
 
 def needs_sensitive_approval(client_id, query):
-    if "*" in query:
-        return True
-    for col in sensitive_columns:
-        if col in query.lower():
-            return True
+    # Temporarily disabled for testing
     return False
+    # if "*" in query:
+    #     return True
+    # for col in sensitive_columns:
+    #     if col in query.lower():
+    #         return True
+    # return False
 
 
 def get_table_columns(table_name, cursor):

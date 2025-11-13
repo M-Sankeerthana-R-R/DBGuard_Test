@@ -265,3 +265,24 @@ ORDER BY e1.name;",2.68,True,"(1, 'John Doe', 'john@example.com')
 (2, 'Jane Smith', 'jane@example.com')","{""status"": ""Slow"", ""root_cause"": ""function_based_filter"", ""score"": 0.89}"
 2025-11-04 19:33:35,2,SELECT,select * from employees;,5.42,True,"(1, 'John Doe', 'john@example.com')
 (2, 'Jane Smith', 'jane@example.com')","{""status"": ""Slow"", ""root_cause"": ""function_based_filter"", ""score"": 0.89}"
+2025-11-06 14:23:12,3,SELECT,select * from employees;,7.37,True,"(1, 'John Doe', 'john@example.com')
+(2, 'Jane Smith', 'jane@example.com')","{""status"": ""Slow"", ""root_cause"": ""function_based_filter"", ""score"": 0.89}"
+2025-11-06 14:24:06,3,SELECT,select * from employees;,3.31,True,"(1, 'John Doe', 'john@example.com')
+(2, 'Jane Smith', 'jane@example.com')","{""status"": ""Slow"", ""root_cause"": ""function_based_filter"", ""score"": 0.89}"
+2025-11-06 14:26:53,3,SELECT,select * from employees;,2.3,True,"(1, 'John Doe', 'john@example.com')
+(2, 'Jane Smith', 'jane@example.com')","{""status"": ""Normal"", ""root_cause"": """", ""score"": 0.3908}"
+2025-11-06 14:28:07,3,SELECT,select * from employees;,3.54,True,"(1, 'John Doe', 'john@example.com')
+(2, 'Jane Smith', 'jane@example.com')","{""status"": ""Normal"", ""root_cause"": """", ""score"": 0.3908}"
+2025-11-06 19:38:09,2,SELECT,select * from employees;,2.55,True,"(1, 'John Doe', 'john@example.com')
+(2, 'Jane Smith', 'jane@example.com')","{""status"": ""Normal"", ""root_cause"": """", ""score"": 0.3908}"
+2025-11-06 19:49:07,3,SELECT,select * from employees;,5.43,True,"(1, 'John Doe', 'john@example.com')
+(2, 'Jane Smith', 'jane@example.com')","{""status"": ""Normal"", ""root_cause"": """", ""score"": 0.3908}"
+2025-11-06 20:05:03,3,SELECT,select * from employees;,5.9,True,"(1, 'John Doe', 'john@example.com')
+(2, 'Jane Smith', 'jane@example.com')","{""status"": ""Normal"", ""root_cause"": """", ""score"": 0.3908}"
+2025-11-06 20:16:55,3,SELECT,select * from employees;,3.85,True,"(1, 'John Doe', 'john@example.com')
+(2, 'Jane Smith', 'jane@example.com')","{""status"": ""Normal"", ""root_cause"": """", ""score"": 0.3908}"
+2025-11-13 12:03:49,3,SELECT,select * from employees;,0.02,False,Error executing select: 1046 (3D000): No database selected,"{""status"": ""Near Slow"", ""root_cause"": ""too_many_joins"", ""score"": 0.3908}"
+2025-11-13 12:05:53,3,SELECT,select * from employees;,0.0,False,Error executing select: 1046 (3D000): No database selected,"{""status"": ""Near Slow"", ""root_cause"": ""too_many_joins"", ""score"": 0.3908}"
+2025-11-13 12:07:21,2,SELECT,select * from employees;,0.0,False,Error executing select: 1046 (3D000): No database selected,"{""status"": ""Near Slow"", ""root_cause"": ""too_many_joins"", ""score"": 0.3908}"
+2025-11-13 12:09:35,2,SELECT,select * from employees;,0.11,False,"(1, 'John Doe', 'john@example.com')
+(2, 'Jane Smith', 'jane@example.com')","{""status"": ""Near Slow"", ""root_cause"": ""too_many_joins"", ""score"": 0.3908}"
