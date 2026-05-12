@@ -1,0 +1,63 @@
+[2025-08-05 12:28:39] SLOW QUERY by 1 (4.85s):
+select * from employees;
+
+[2025-08-06 10:17:40] SLOW QUERY by 1 (6.21s):
+select * from employees;
+
+[2025-08-06 10:22:36] SLOW QUERY by 99 (3.88s):
+select ssn from employees;
+
+[2025-08-06 10:40:12] SLOW QUERY by 99 (1012.07s):
+delete from employees;
+
+[2025-08-06 10:40:36] SLOW QUERY by 1 (4.73s):
+select * from employees;
+
+[2025-08-06 10:41:05] SLOW QUERY by 1 (4.17s):
+select * from employees;
+
+[2025-08-06 10:43:16] SLOW QUERY by 1 (5.35s):
+select * from employees;
+
+[2025-08-06 10:47:10] SLOW QUERY by 1 (4.09s):
+select * from employees;
+
+[2025-08-06 10:48:06] SLOW QUERY by 1 (4.58s):
+select * from employees;
+
+[2025-08-06 10:48:44] SLOW QUERY by 2 (4.07s):
+select * from employees;
+
+[2025-08-06 10:56:23] SLOW QUERY by 1 (3.63s):
+select * from employees;
+
+[2025-08-06 10:58:21] SLOW QUERY by 2 (6.72s):
+select * from employees
+
+[2025-08-06 11:01:27] SLOW QUERY by 2 (4.21s):
+select * from employees
+
+[2025-08-06 11:04:29] SLOW QUERY by 2 (5.18s):
+select * from employees
+
+[2025-08-06 11:06:03] SLOW QUERY by 2 (6.23s):
+select * from employees
+
+[2025-08-06 11:06:05] SLOW QUERY by 1 (6.35s):
+select * from employees;
+
+[2025-08-06 11:08:39] SLOW QUERY by 2 (3.27s):
+select * from employees
+
+[2025-08-06 11:09:33] SLOW QUERY by 1 (7.28s):
+select ssn from employees;
+
+[2025-08-06 11:24:08] SLOW QUERY by 99 (25.32s):
+select * from employees;
+
+[2025-08-06 11:24:27] SLOW QUERY by 99 (5.03s):
+select ssn from employees;
+
+[2025-08-06 11:24:48] SLOW QUERY by 99 (4.50s):
+select password from employees;
+

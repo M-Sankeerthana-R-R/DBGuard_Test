@@ -208,8 +208,8 @@ const ClientDetails = () => {
                 msg.toLowerCase().includes("highly")
                   ? "alert-high"
                   : msg.toLowerCase().includes("slightly")
-                  ? "alert-medium"
-                  : "alert-low"
+                    ? "alert-medium"
+                    : "alert-low"
               }`}
             >
               ⚠ {msg}
@@ -261,7 +261,7 @@ const ClientDetails = () => {
             </tr>
           </thead>
           <tbody>
-            {clientData.queries.map((q, index) => (
+            {(clientData.queries || []).map((q, index) => (
               <tr key={index}>
                 <td>{q.Timestamp}</td>
 
@@ -283,8 +283,8 @@ const ClientDetails = () => {
                       q.Status === "Slow"
                         ? "#ff4d4d"
                         : q.Status === "Near Slow"
-                        ? "#ffb84d"
-                        : "#4dff88",
+                          ? "#ffb84d"
+                          : "#4dff88",
                     fontWeight: "bold",
                     textTransform: "uppercase",
                   }}
@@ -295,10 +295,10 @@ const ClientDetails = () => {
                 <td>{q.Score ? q.Score.toFixed(3) : "—"}</td>
 
                 <td>
-                  {q.RootCauses && q.RootCauses.length > 0 ? (
+                  {Array.isArray(q.RootCauses) && q.RootCauses.length > 0 ? (
                     <pre style={{ whiteSpace: "pre-wrap", color: "#e0e0e0" }}>
                       {q.RootCauses.map(
-                        (r) => `${r.cause}: ${r.score.toFixed(3)}`
+                        (r) => `${r.cause}: ${r.score.toFixed(3)}`,
                       ).join("\n")}
                     </pre>
                   ) : (

@@ -71,6 +71,7 @@ const ClientDashboard = () => {
 
       // Parse response - backend sends plain text or may not parse JSON
       let actualResponse = data.response;
+      actualResponse = actualResponse || "No response from server";
       let queryStatus = "SUCCESS";
       let rootCause = "";
       let scoreValue = 0;
@@ -114,8 +115,8 @@ const ClientDashboard = () => {
         status: queryStatus,
         executionTime: "N/A", // Backend doesn't send execution time to client
         rowsAffected:
-          actualResponse.split("\n").length > 0
-            ? actualResponse.split("\n").length + " rows"
+          (actualResponse || "").split("\n").length > 0
+            ? (actualResponse || "").split("\n").length + " rows"
             : "Unknown",
         rootCauses: rootCause ? [{ cause: rootCause, score: scoreValue }] : [],
         score: scoreValue,
@@ -171,7 +172,7 @@ const ClientDashboard = () => {
           query: currentQuery,
           status: queryStatus,
           executionTime: "N/A",
-          rowsAffected: actualResponse.split("\n").length + " rows",
+          rowsAffected: (actualResponse || "").split("\n").length + " rows",
           timestamp: new Date().toLocaleTimeString(),
         },
         ...prev.slice(0, 9), // Keep last 10

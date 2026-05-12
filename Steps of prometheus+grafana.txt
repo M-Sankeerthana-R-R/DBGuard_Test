@@ -1,0 +1,82 @@
+1) After docker-compose down and docker-compose up -d
+
+(Optional- docker exec -it mysql mysql -u root -p and pwd is "rootpassword") - use mydb; then create table and use queries and keep refreshing query on - http://localhost:9090/query?g0.expr=mysql_global_status_connections&g0.show_tree=0&g0.tab=table&g0.range_input=1h&g0.res_type=auto&g0.res_density=medium&g0.display_mode=lines&g0.show_exemplars=0)
+-- Keep executing same queries in every 20-30 secs to create traffic as Prometheus scrapes every 15 seconds
+
+2) (Prometheues site) Check http://localhost:9090/targets(1/1 up -green signal must be there)
+3) Grafana->Home->Connections->Data sources->Add datasource->save+test(Shall get a successful message)
+4) Grafana->dashboards->import->7362+load->select Prometheus data source that we set->can see all metrics.
+
+
+Insert ex-
+insert into employees values(5,"Alia","HR",95000.00,"122-69-9800","hashed_pwd5","alia@example.com",'2023-07-08');
+
+
+
+
+Final app:
+1)Run docker in bg, docker-compose up -d for mysql-monitoring folder u do
+2)Do python app.py for /backend folder of app
+3)Do npm start for react app
+4)Run the server
+5)Go to /console route and do the whole execution and get rankings
+
+
+
+
+In ppt update ; to explain all inputs separately with meaning and sample example
+Replace plan in architecture - example
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Bert -[8,128,768] -->[8,768]: sequence embeddings-- later pooling together to get 768 dimension
+QueryFormer- [8,1,128]
+Log - [8,32]
+TS- [8,32]
+
+All of them pass through the linear layers to get [8,256] finally
+
+
+
+
+Cmds to run:
+
+1)
+-cd backend1
+-python app.py
+2)
+-cd ..
+-npm start
+3)
+-cd mysql-monitoring
+-docker exec -it mysql mysql -u root -p 
+{and pwd is "rootpassword") - use mydb}
+4)
+-cd mysql-monitoring
+-docker-compose up -d
+5)
+-cd backend1
+-python server.py
+6)
+-cd backend1
+-python client.py
